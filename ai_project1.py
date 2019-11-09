@@ -11,7 +11,7 @@ class state():
     def __init__(self,mode,nums_arr,depth,parent=None,movement=None):
         self.depth = depth
         self.movement=movement
-        self.f = 0
+        self.f = -1
         self.parent = parent
         coord_x=0
         coord_y=0
@@ -58,13 +58,16 @@ class state():
                     blankOneFound=1
                 coord_x+=1
         elif mode==1:
-            self.board=nums_arr
+            self.board=dict(nums_arr)
 
     def __eq__(self,other):
         if other==None:
             return False
         alt = self.alternate()
-        if self.board == other.board or alt.board == other.board:
+        arr = self.returnArray()
+        oArr = other.returnArray()
+        altArr = alt.returnArray()
+        if oArr==arr or oArr==altArr:
             return True
         return False
     
@@ -122,7 +125,6 @@ class state():
     def oneDown(self):
         newState = state(1,self.board,self.depth+1,self,"D1")
         coords = newState.board.get("blankOne")
-        print(coords)
         if coords[1]==3:
             return None
         else:
@@ -211,6 +213,7 @@ class state():
             if key!="blankOne" and key!="blankTwo":
                 h+=abs(self.board[key][0]-goal.board[key][0])+abs(self.board[key][1]-goal.board[key][1])
         self.f = self.depth + h
+        return self.f
     
     def expand_node(self):
         self.childStates=[
@@ -224,7 +227,9 @@ class state():
             self.twoLeft()
         ]
 
-#Use this to make the path lists faster
+"""
+Currently considering using LinkedLists instead of normal lists to improve efficiency
+"""
 #class LinkedList():
 #    class Node():
 #        def __init__(self,value=None,prev=None,nex=None):
@@ -290,7 +295,6 @@ while 1:
         print("No solution found")
         sys.exit(0)
     curr_node = frontier.pop()
-    print(curr_node.returnArray())
     if curr_node==goal_state: # If goal state reached, write to file and terminate program
         sys.exit()
         inFile = open("testFile.txt",'w')
@@ -321,32 +325,49 @@ while 1:
     explored.append(curr_node)
     explored.append(curr_node.alternate()) # Empty spaces on the board are not abstracted. An aternate version of each state, where positions of empty spaces are swapped, is saved to explored as well
     curr_node.expand_node()
-    print(curr_node.returnArray())
     for ch in curr_node.childStates:
         if ch!=None:
             nodesGenerated+=1
     
-    print("Original: ",curr_node.returnArray(),"\n")
-     
-    for ch in curr_node.childStates:
-        if ch==None:
-            print("None\n")
-        else:
-            print(ch.movement,": ",ch.returnArray())
-            print(ch.board==curr_node.board,"\n")
+#    print("Original: ",curr_node.returnArray(),"\n")
+#     
+#    for ch in curr_node.childStates:
+#        if ch==None:
+#            print("None\n")
+#        else:
+#            print(ch.movement,": ",ch.returnArray())
+#            print(ch==goal_state,"\n")
         
-    sys.exit()
-    for i in range(len(curr_node.childStates)): # Iterate through current node's child states
-        if curr_node.childStates[i] != None:
-            if (curr_node.childStates[i] not in explored) and (curr_node.childStates[i] not in frontier):
-                curr_node.childStates[i].calc_fn(goal_state)
+
+    for child in curr_node.childStates: # Iterate through current node's child states
+        if child != None:
+            flag = True
+            for elem in explored:
+                if elem == child:
+                    flag = False
+            for elem in frontier:
+                if elem == child:
+                    flag = False
+            
+            if flag:
+                child.calc_fn(goal_state)
                 # This section places newly discovered nodes into its priority position
                 # Priority is defined by f(n), where f(n)=g(n)+h(n) & g(n)=depth & h(n) is Manhattan distances of numbered tiles to goal positions.
-                j = len(frontier)-1
-                if j==-1:
-                    frontier.insert(0,curr_node.childStates[i])
-                else:
-                    while curr_node.childStates[i].f>frontier[j]:
-                        j-=1
-                    frontier.insert(j,curr_node.childStates[i])
-                print(len(frontier))
+                if len(frontier)==0:
+                    frontier.append(child)
+                    flag = False
+                j=len(frontier)-1
+                while j>-1 and flag:
+                    if child.f>=frontier[j].f:
+                        if j == len(frontier) - 1:
+                            frontier.append(child)
+                        else:
+                            frontier.insert(j+1,child)
+                        flag = False
+                    j-=1
+                frontier.insert(0,child)
+                
+                
+    for ch in frontier:
+        print(ch.returnArray(),ch.f)
+    sys.exit()
