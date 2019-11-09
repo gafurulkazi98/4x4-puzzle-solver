@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
+Created By Gafurul (Rafi) Islam Kazi
 
-This is a temporary script file.
+For any recruiters looking through this,
+    please note that this version is neither finished nor optimized.
 """
+import sys
 
 class state():
-    def __init__(self,mode,nums_arr,depth,parent=None):
+    def __init__(self,mode,nums_arr,depth,parent=None,movement=None):
         self.depth = depth
+        self.movement=movement
         self.f = 0
         self.parent = parent
         coord_x=0
@@ -58,6 +61,8 @@ class state():
             self.board=nums_arr
 
     def __eq__(self,other):
+        if other==None:
+            return False
         alt = self.alternate()
         if self.board == other.board or alt.board == other.board:
             return True
@@ -79,117 +84,119 @@ class state():
                 "nine":     9,
                 "ten":      10,
                 "eleven":   11,
-                "twevle":   12,
+                "twelve":   12,
                 "thirteen": 13,
                 "fourteen": 14}
         for key in self.board:
-            pos = (self.board[key][1]+1)*4+(self.board[key][0]+1) - 1
-            retArr.insert(switchCase.get(key),pos)
+            coord=self.board.get(key)
+            pos = (coord[1])*4+(coord[0])
+            retArr[pos] = switchCase.get(key)
         return retArr
     
     def oneUp(self):
-        newState = state(1,self.board,self.depth+1,self)
-        if newState.board["blankOne"][1]>0:
-            new_coord = newState.board["blankOne"]
-            new_coord[1] -= 1
-            for key in newState.board:
-                if newState.board[key] == new_coord:
-                    newState.board[key][1] +=1
-                    newState.board["blankOne"] = new_coord
-                    return newState
-        else:
+        newState = state(1,self.board,self.depth+1,self,"U1")
+        coords = newState.board.get("blankOne")
+        if coords[1]==0:
             return None
+        else:
+            new_coords = [coords[0],coords[1] - 1]
+            for key in newState.board:
+                if newState.board[key] == new_coords:
+                    newState.board[key] = coords
+                    newState.board["blankOne"] = new_coords
+                    return newState
     
     def oneRight(self):
-        newState = state(1,self.board,self.depth+1,self)
-        if newState.board["blankOne"][0]<3:
-            new_coord = newState.board["blankOne"]
-            new_coord[0] += 1
-            for key in newState.board:
-                if newState.board[key] == new_coord:
-                    newState.board[key][0] -=1
-                    newState.board["blankOne"] = new_coord
-                    return newState
-        else:
+        newState = state(1,self.board,self.depth+1,self,"R1")
+        coords = newState.board.get("blankOne")
+        if coords[0]==3:
             return None
+        else:
+            new_coords = [coords[0]+1,coords[1]]
+            for key in newState.board:
+                if newState.board[key] == new_coords:
+                    newState.board[key] = coords
+                    newState.board["blankOne"] = new_coords
+                    return newState
     
     def oneDown(self):
-        newState = state(1,self.board,self.depth+1,self)
-        if newState.board["blankOne"][1]<3:
-            new_coord = newState.board["blankOne"]
-            new_coord[1] += 1
-            for key in newState.board:
-                if newState.board[key] == new_coord:
-                    newState.board[key][1] -=1
-                    newState.board["blankOne"] = new_coord
-                    return newState
-        else:
+        newState = state(1,self.board,self.depth+1,self,"D1")
+        coords = newState.board.get("blankOne")
+        print(coords)
+        if coords[1]==3:
             return None
+        else:
+            new_coords = [coords[0],coords[1] + 1]
+            for key in newState.board:
+                if newState.board[key] == new_coords:
+                    newState.board[key] = coords
+                    newState.board["blankOne"] = new_coords
+                    return newState
     
     def oneLeft(self):
-        newState = state(1,self.board,self.depth+1,self)
-        if newState.board["blankOne"][0]>0:
-            new_coord = newState.board["blankOne"]
-            new_coord[0] -= 1
-            for key in newState.board:
-                if newState.board[key] == new_coord:
-                    newState.board[key][0] +=1
-                    newState.board["blankOne"] = new_coord
-                    return newState
-        else:
+        newState = state(1,self.board,self.depth+1,self,"L1")
+        coords = newState.board.get("blankOne")
+        if coords[0]==0:
             return None
+        else:
+            new_coords = [coords[0] - 1,coords[1]]
+            for key in newState.board:
+                if newState.board[key] == new_coords:
+                    newState.board[key] = coords
+                    newState.board["blankOne"] = new_coords
+                    return newState
     
     def twoUp(self):
-        newState = state(1,self.board,self.depth+1,self)
-        if newState.board["blankTwo"][1]>0:
-            new_coord = newState.board["blankTwo"]
-            new_coord[1] -= 1
-            for key in newState.board:
-                if newState.board[key] == new_coord:
-                    newState.board[key][1] +=1
-                    newState.board["blankTwo"] = new_coord
-                    return newState
-        else:
+        newState = state(1,self.board,self.depth+1,self,"U2")
+        coords = newState.board.get("blankTwo")
+        if coords[0]==0:
             return None
+        else:
+            new_coords = [coords[0],coords[1] - 1]
+            for key in newState.board:
+                if newState.board[key] == new_coords:
+                    newState.board[key] = coords
+                    newState.board["blankTwo"] = new_coords
+                    return newState
     
     def twoRight(self):
-        newState = state(1,self.board,self.depth+1,self)
-        if newState.board["blankTwo"][0]>3:
-            new_coord = newState.board["blankTwo"]
-            new_coord[0] += 1
-            for key in newState.board:
-                if newState.board[key] == new_coord:
-                    newState.board[key][0] -=1
-                    newState.board["blankTwo"] = new_coord
-                    return newState
-        else:
+        newState = state(1,self.board,self.depth+1,self,"R2")
+        coords = newState.board.get("blankTwo")
+        if coords[0]==0:
             return None
+        else:
+            new_coords = [coords[0] + 1,coords[1]]
+            for key in newState.board:
+                if newState.board[key] == new_coords:
+                    newState.board[key] = coords
+                    newState.board["blankTwo"] = new_coords
+                    return newState
     
     def twoDown(self):
-        newState = state(1,self.board,self.depth+1,self)
-        if newState.board["blankTwo"][1]<3:
-            new_coord = newState.board["blankTwo"]
-            new_coord[1] += 1
-            for key in newState.board:
-                if newState.board[key] == new_coord:
-                    newState.board[key][1] -=1
-                    newState.board["blankTwo"] = new_coord
-                    return newState
-        else:
+        newState = state(1,self.board,self.depth+1,self,"D2")
+        coords = newState.board.get("blankTwo")
+        if coords[0]==0:
             return None
+        else:
+            new_coords = [coords[0],coords[1] + 1]
+            for key in newState.board:
+                if newState.board[key] == new_coords:
+                    newState.board[key] = coords
+                    newState.board["blankTwo"] = new_coords
+                    return newState
     
     def twoLeft(self):
-        newState = state(1,self.board,self.depth+1,self)
-        if newState.board["blankTwo"][0]>0:
-            new_coord = newState.board["blankTwo"]
-            new_coord[0] -= 1
-            for key in newState.board:
-                if newState.board[key] == new_coord:
-                    newState.board[key][0] +=1
-                    newState.board["blankTwo"] = new_coord
-                    return newState
-        else:
+        newState = state(1,self.board,self.depth+1,self,"L2")
+        coords = newState.board.get("blankTwo")
+        if coords[0]==0:
             return None
+        else:
+            new_coords = [coords[0] - 1,coords[1]]
+            for key in newState.board:
+                if newState.board[key] == new_coords:
+                    newState.board[key] = coords
+                    newState.board["blankTwo"] = new_coords
+                    return newState
         
     def alternate(self):
         newState = state(1,self.board,self.depth)
@@ -206,82 +213,140 @@ class state():
         self.f = self.depth + h
     
     def expand_node(self):
-        self.childStates={
-                self.oneUp():"U1",
-                self.oneRight():"R1",
-                self.oneDown():"D1",
-                self.oneLeft():"L1",
-                self.twoUp():"U2",
-                self.twoRight():"R2",
-                self.twoDown():"D2",
-                self.twoLeft():"L2"
-            }
+        self.childStates=[
+            self.oneUp(),
+            self.oneRight(),
+            self.oneDown(),
+            self.oneLeft(),
+            self.twoUp(),
+            self.twoRight(),
+            self.twoDown(),
+            self.twoLeft()
+        ]
 
-def main():
-    initial_state_arr = []
-    final_state_arr = []
-    nodesGenerated = 1
-    inFile = open("inputFile.txt",'w')
-    inLines = inFile.readlines()
-    for i in range(4):
-        splitLine = inLines[i].split(" ")
+#Use this to make the path lists faster
+#class LinkedList():
+#    class Node():
+#        def __init__(self,value=None,prev=None,nex=None):
+#            self.value=value
+#            self.prev=prev
+#            self.next=nex
+#            
+#    def __init__(self,head=None):
+#        self.head=Node(head)
+#        self.tail=self.head
+#    
+#    def insert(self,index,value):
+#        newNode=Node(value)
+#        cursor=self.head
+#        if index==0:
+#            newNode.next=self.head
+#            self.head.prev=newNode
+#            self.head=newNode
+#        else:
+#            for i in range(index):
+#                cursor=cursor.next
+#            prev=cursor.prev
+#            nex=cursor
+#            newNode.prev=prev
+#            newNode.next=nex
+#            prev.next=newNode
+#            nex.prev=newNode
+#    
+#    def returnArray(self):
+#        retArr=[]
+#        cursor=self.head
+#        while cursor!=None:
+#            retArr.append(cursor.value)
+#            cursor=cursor.next
+#        return retArr
+
+
+initial_state_arr = []
+final_state_arr = []
+nodesGenerated = 1
+inFile = open("testFile.txt",'r')
+inLines = inFile.readlines()
+#print(inLines)
+for i in range(9):
+    if i<4:
+        stripLine = inLines[i].strip()
+        splitLine = stripLine.split(" ")
         for char in splitLine:
             initial_state_arr.append(char)
-    for j in range(6,10):
-        splitLine = inLines[i].split(" ")
+    if i>4:
+        stripLine = inLines[i].strip()
+        splitLine = stripLine.split(" ")
         for char in splitLine:
             final_state_arr.append(char)
-    print(initial_state_arr)
-    explored=[]
-    frontier=[state(0,initial_state_arr,0)]
-    goal_state = state(0,final_state_arr,0)
-    
-    while 1:
-        if len(frontier)==0: # If no nodes left to explore, terminate program
-            print("No solution found")
-            inFile.close()
-            exit(1)
-        curr_node = frontier.pop()
-        if curr_node==goal_state: # If goal state reached, write to file and terminate program
-            # Replace this with a parent system
-            inFile.write("\n"+curr_node.depth)
-            inFile.write("\n")
-            inFile.write("\n"+nodesGenerated)
-            inFile.write("\n")
-            path = []
-            fpath = []
-            path_cursor = curr_node
-            while path_cursor.parent != None:
-                fpath.insert(0,path_cursor.f)
-                child = path_cursor
-                path_cursor = path_cursor.parent
-                path.insert(0,path_cursor.childStates.get(child))
+#print(initial_state_arr)
+inFile.close()
+explored=[]
+frontier=[state(0,initial_state_arr,0)]
+goal_state = state(0,final_state_arr,0)
+
+while 1:
+    if len(frontier)==0: # If no nodes left to explore, terminate program
+        print("No solution found")
+        sys.exit(0)
+    curr_node = frontier.pop()
+    print(curr_node.returnArray())
+    if curr_node==goal_state: # If goal state reached, write to file and terminate program
+        sys.exit()
+        inFile = open("testFile.txt",'w')
+        inFile.write("\n"+curr_node.depth)
+        inFile.write("\n")
+        inFile.write("\n"+nodesGenerated)
+        inFile.write("\n")
+        path = []
+        fpath = []
+        path_cursor = curr_node
+        while path_cursor.parent != None:
             fpath.insert(0,path_cursor.f)
-            for elem in path:
-                inFile.write(elem+" ")
-            inFile.write("\n")
-            for elem in fpath:
-                inFile.write(elem+" ")
-            inFile.write("\n")
-            inFile.close()
-            print("Solution Found!")
-            exit(1)
-        explored.append(curr_node)
-        explored.append(curr_node.alternate()) # Empty spaces on the board are not abstracted. Alternate version of each state, where positions of empty spaces are swapped are saved to explored as well
-        curr_node.expand_node()
-        nodesGenerated+=8
+            child = path_cursor
+            path_cursor = path_cursor.parent
+            for ch in path_cursor.childStates:
+                if ch[0]==child:
+                    path.insert(0,ch[1])
+        fpath.insert(0,path_cursor.f)
+        for elem in path:
+            inFile.write(elem+" ")
+        inFile.write("\n")
+        for elem in fpath:
+            inFile.write(elem+" ")
+        inFile.write("\n")
+        inFile.close()
+        print("Solution Found!")
+        sys.exit(0)
+    explored.append(curr_node)
+    explored.append(curr_node.alternate()) # Empty spaces on the board are not abstracted. An aternate version of each state, where positions of empty spaces are swapped, is saved to explored as well
+    curr_node.expand_node()
+    print(curr_node.returnArray())
+    for ch in curr_node.childStates:
+        if ch!=None:
+            nodesGenerated+=1
+    
+    print("Original: ",curr_node.returnArray(),"\n")
+     
+    for ch in curr_node.childStates:
+        if ch==None:
+            print("None\n")
+        else:
+            print(ch.movement,": ",ch.returnArray())
+            print(ch.board==curr_node.board,"\n")
         
-        # Modify this to account for childStates being a dict
-        for i in range(len(curr_node.childStates)): # Iterate through current node's child states
-            if curr_node.childStates[i] != None:
-                if curr_node.childStates[i] not in explored and curr_node.childStates[i] not in frontier:
-                    curr_node.childStates[i].calc_fn(goal_state)
-                    # This section places newly discovered nodes into its priority position
-                    # Priority is defined by f(n), where f(n)=g(n)+h(n) & g(n)=depth & h(n) is Manhattan distances of numbered tiles to goal positions.
-                    j = len(frontier)-1
-                    if j==-1:
-                        frontier.insert(0,curr_node.childStates[i])
-                    else:
-                        while curr_node.childStates[i].f>frontier[j]:
-                            j-=1
-                        frontier.insert(j,curr_node.childStates[i])
+    sys.exit()
+    for i in range(len(curr_node.childStates)): # Iterate through current node's child states
+        if curr_node.childStates[i] != None:
+            if (curr_node.childStates[i] not in explored) and (curr_node.childStates[i] not in frontier):
+                curr_node.childStates[i].calc_fn(goal_state)
+                # This section places newly discovered nodes into its priority position
+                # Priority is defined by f(n), where f(n)=g(n)+h(n) & g(n)=depth & h(n) is Manhattan distances of numbered tiles to goal positions.
+                j = len(frontier)-1
+                if j==-1:
+                    frontier.insert(0,curr_node.childStates[i])
+                else:
+                    while curr_node.childStates[i].f>frontier[j]:
+                        j-=1
+                    frontier.insert(j,curr_node.childStates[i])
+                print(len(frontier))
