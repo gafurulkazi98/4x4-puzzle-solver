@@ -60,7 +60,7 @@ class state():
         elif mode==1:
             self.board=dict(nums_arr)
 
-    def __eq__(self,other):
+    def __eq__(self,other): # __eq__ is designed to check 
         if other==None:
             return False
         alt = self.alternate()
@@ -71,7 +71,7 @@ class state():
             return True
         return False
     
-    def returnArray(self):
+    def returnArray(self): # This was primarily used for debugging
         retArr=[None]*16
         switchCase = {
                 "blankOne": 0,
@@ -200,7 +200,7 @@ class state():
                     newState.board["blankTwo"] = new_coords
                     return newState
         
-    def alternate(self):
+    def alternate(self): # This returns a version of the state where blankOne & blankTwo are swapped
         newState = state(1,self.board,self.depth)
         blank_coord = newState.board.get("blankOne")
         newState.board["blankOne"] = newState.board.get("blankTwo")
@@ -270,8 +270,9 @@ Currently considering using LinkedLists instead of normal lists to improve effic
 initial_state_arr = []
 final_state_arr = []
 nodesGenerated = 1
-inFile = open("testFile.txt",'r')
+inFile = open("Input2.txt",'r')
 inLines = inFile.readlines()
+outLines = inLines
 #print(inLines)
 for i in range(9):
     if i<4:
@@ -289,19 +290,28 @@ inFile.close()
 explored=[]
 frontier=[state(0,initial_state_arr,0)]
 goal_state = state(0,final_state_arr,0)
+frontier[0].calc_fn(goal_state)
 
-while 1:
+while len(explored)<=500:
+    if len(explored)%10==0:
+        for ch in frontier:
+            print(len(frontier),len(explored),ch.returnArray(),ch.f)
+        
+        
     if len(frontier)==0: # If no nodes left to explore, terminate program
         print("No solution found")
         sys.exit(0)
     curr_node = frontier.pop()
+#    print(curr_node.returnArray())
     if curr_node==goal_state: # If goal state reached, write to file and terminate program
-        sys.exit()
-        inFile = open("testFile.txt",'w')
-        inFile.write("\n"+curr_node.depth)
-        inFile.write("\n")
-        inFile.write("\n"+nodesGenerated)
-        inFile.write("\n")
+        print("Solution Found!")
+        #sys.exit()
+        outFile = open("Output2.txt",'w')
+        for line in outLines:
+            outFile.write(line)
+        outFile.write("\n"+str(curr_node.depth))
+        outFile.write("\n"+str(nodesGenerated))
+        outFile.write("\n")
         path = []
         fpath = []
         path_cursor = curr_node
@@ -310,20 +320,18 @@ while 1:
             child = path_cursor
             path_cursor = path_cursor.parent
             for ch in path_cursor.childStates:
-                if ch[0]==child:
-                    path.insert(0,ch[1])
+                if ch==child:
+                    path.insert(0,ch.movement)
         fpath.insert(0,path_cursor.f)
         for elem in path:
-            inFile.write(elem+" ")
-        inFile.write("\n")
+            outFile.write(elem+" ")
+        outFile.write("\n")
         for elem in fpath:
-            inFile.write(elem+" ")
-        inFile.write("\n")
-        inFile.close()
-        print("Solution Found!")
-        sys.exit(0)
+            outFile.write(str(elem)+" ")
+        outFile.write("\n")
+        outFile.close()
+        sys.exit()
     explored.append(curr_node)
-    explored.append(curr_node.alternate()) # Empty spaces on the board are not abstracted. An aternate version of each state, where positions of empty spaces are swapped, is saved to explored as well
     curr_node.expand_node()
     for ch in curr_node.childStates:
         if ch!=None:
@@ -342,6 +350,11 @@ while 1:
     for child in curr_node.childStates: # Iterate through current node's child states
         if child != None:
             flag = True
+            #print("\n")
+            #If this childState already exists in explored or the frontier, no further action will be taken
+            #In a more advanced system, it would check if the version of the state stored in explored or frontier, however, with this type of problem, it is not necessary to check, because the childState would never have a lower f(n) than the version already in explored or frontier.
+            #Short for lists were used instead of "if child in lst" because I could not find if this method would use the __eq__ function that I made.
+            
             for elem in explored:
                 if elem == child:
                     flag = False
@@ -351,23 +364,20 @@ while 1:
             
             if flag:
                 child.calc_fn(goal_state)
+                
                 # This section places newly discovered nodes into its priority position
                 # Priority is defined by f(n), where f(n)=g(n)+h(n) & g(n)=depth & h(n) is Manhattan distances of numbered tiles to goal positions.
-                if len(frontier)==0:
-                    frontier.append(child)
-                    flag = False
-                j=len(frontier)-1
-                while j>-1 and flag:
-                    if child.f>=frontier[j].f:
-                        if j == len(frontier) - 1:
-                            frontier.append(child)
-                        else:
-                            frontier.insert(j+1,child)
+                j = 0
+                while j<len(frontier) and flag:
+                   # print(xcu,j,child.f,frontier[j].f,child.f>=frontier[j].f)
+                    if child.f>frontier[j].f:
+                        frontier.insert(j,child)
                         flag = False
-                    j-=1
-                frontier.insert(0,child)
+                    j+=1
+                if flag:
+                    frontier.append(child)
                 
                 
-    for ch in frontier:
-        print(ch.returnArray(),ch.f)
-    sys.exit()
+#    for ch in frontier:
+#        print(ch.returnArray(),ch.f)
+#    sys.exit()
