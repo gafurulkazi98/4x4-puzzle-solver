@@ -164,7 +164,7 @@ class state():
     def twoRight(self):
         newState = state(1,self.board,self.depth+1,self,"R2")
         coords = newState.board.get("blankTwo")
-        if coords[0]==0:
+        if coords[0]==3:
             return None
         else:
             new_coords = [coords[0] + 1,coords[1]]
@@ -270,7 +270,7 @@ Currently considering using LinkedLists instead of normal lists to improve effic
 initial_state_arr = []
 final_state_arr = []
 nodesGenerated = 1
-inFile = open("Input2.txt",'r')
+inFile = open("Input3.txt",'r')
 inLines = inFile.readlines()
 outLines = inLines
 #print(inLines)
@@ -292,12 +292,13 @@ frontier=[state(0,initial_state_arr,0)]
 goal_state = state(0,final_state_arr,0)
 frontier[0].calc_fn(goal_state)
 
-while len(explored)<=500:
-    if len(explored)%10==0:
-        for ch in frontier:
-            print(len(frontier),len(explored),ch.returnArray(),ch.f)
-        
-        
+while 1:
+#    if len(explored)%10==0:
+    for ch in frontier:
+        print(len(frontier),len(explored),ch.returnArray(),ch.f,ch.movement)
+    
+    
+    
     if len(frontier)==0: # If no nodes left to explore, terminate program
         print("No solution found")
         sys.exit(0)
@@ -306,7 +307,7 @@ while len(explored)<=500:
     if curr_node==goal_state: # If goal state reached, write to file and terminate program
         print("Solution Found!")
         #sys.exit()
-        outFile = open("Output2.txt",'w')
+        outFile = open("Output3.txt",'w')
         for line in outLines:
             outFile.write(line)
         outFile.write("\n"+str(curr_node.depth))
